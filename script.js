@@ -76,29 +76,29 @@ class Player {
         // context.save()
         // context.translate(this.x, this.y)
 
-        if (this.x >= mouse.x) {
-            context.drawImage(playerLeft, 
-                this.frameX * this.spriteWidth,
-                this.frameY * this.spriteHeight,
-                this.spriteWidth, 
-                this.spriteHeight,
-                this.x - 60,
-                this.y - 45,
-                this.spriteWidth / 4,
-                this.spriteHeight / 4
-            )
-        } else {
-            context.drawImage(playerRight, 
-                this.frameX * this.spriteWidth,
-                this.frameY * this.spriteHeight,
-                this.spriteWidth, 
-                this.spriteHeight,
-                this.x - 60,
-                this.y - 45,
-                this.spriteWidth / 4,
-                this.spriteHeight / 4
-            )
-        }
+        // if (this.x >= mouse.x) {
+        //     context.drawImage(playerLeft, 
+        //         this.frameX * this.spriteWidth,
+        //         this.frameY * this.spriteHeight,
+        //         this.spriteWidth, 
+        //         this.spriteHeight,
+        //         this.x - 60,
+        //         this.y - 45,
+        //         this.spriteWidth / 4,
+        //         this.spriteHeight / 4
+        //     )
+        // } else {
+        //     context.drawImage(playerRight, 
+        //         this.frameX * this.spriteWidth,
+        //         this.frameY * this.spriteHeight,
+        //         this.spriteWidth, 
+        //         this.spriteHeight,
+        //         this.x - 60,
+        //         this.y - 45,
+        //         this.spriteWidth / 4,
+        //         this.spriteHeight / 4
+        //     )
+        // }
     }
 }
 
