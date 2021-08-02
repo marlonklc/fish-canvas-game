@@ -7,9 +7,10 @@ canvas.height = 500
 let score = 0;
 let gameFrame = 0;
 
-let SPEED = 30;
+let FISH_SPEED = 30;
 
-context.font = '50px Georgia'
+context.font = '25px Helvetica'
+let gameSpeed = 1
 
 // mouse interactivity
 let canvasPosition = canvas.getBoundingClientRect()
@@ -50,11 +51,13 @@ class Player {
     update() {
         const dx = this.x - mouse.x
         const dy = this.y - mouse.y
+        let theta = Math.atan2(dy, dx)
+        this.angle = theta
         if (mouse.x !== this.x) {
-            this.x -= dx / SPEED
+            this.x -= dx / FISH_SPEED
         }
         if (mouse.y !== this.y) {
-            this.y -= dy / SPEED
+            this.y -= dy / FISH_SPEED
         }
     }
 
@@ -66,39 +69,42 @@ class Player {
             context.lineTo(mouse.x, mouse.y)
             context.stroke()
         }
-        context.fillStyle = 'red'
-        context.beginPath()
-        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-        context.fill()
-        context.closePath()
-        context.fillRect(this.x, this.y, this.radius, 10)
+        // context.fillStyle = 'red'
+        // context.beginPath()
+        // context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+        // context.fill()
+        // context.closePath()
+        //context.fillRect(this.x, this.y, this.radius, 10)
 
-        // context.save()
-        // context.translate(this.x, this.y)
+        context.save()
+        context.translate(this.x, this.y)
+        context.rotate(this.angle)
 
-        // if (this.x >= mouse.x) {
-        //     context.drawImage(playerLeft, 
-        //         this.frameX * this.spriteWidth,
-        //         this.frameY * this.spriteHeight,
-        //         this.spriteWidth, 
-        //         this.spriteHeight,
-        //         this.x - 60,
-        //         this.y - 45,
-        //         this.spriteWidth / 4,
-        //         this.spriteHeight / 4
-        //     )
-        // } else {
-        //     context.drawImage(playerRight, 
-        //         this.frameX * this.spriteWidth,
-        //         this.frameY * this.spriteHeight,
-        //         this.spriteWidth, 
-        //         this.spriteHeight,
-        //         this.x - 60,
-        //         this.y - 45,
-        //         this.spriteWidth / 4,
-        //         this.spriteHeight / 4
-        //     )
-        // }
+        if (this.x >= mouse.x) {
+            context.drawImage(playerLeft,
+                this.frameX * this.spriteWidth,
+                this.frameY * this.spriteHeight,
+                this.spriteWidth,
+                this.spriteHeight,
+                0 - 60,
+                0 - 45,
+                this.spriteWidth / 4,
+                this.spriteHeight / 4
+            )
+        } else {
+            context.drawImage(playerRight,
+                this.frameX * this.spriteWidth,
+                this.frameY * this.spriteHeight,
+                this.spriteWidth,
+                this.spriteHeight,
+                0 - 60,
+                0 - 45,
+                this.spriteWidth / 4,
+                this.spriteHeight / 4
+            )
+        }
+
+        context.restore()
     }
 }
 
@@ -135,27 +141,23 @@ class Bubble {
 }
 
 const bubbleSound1 = document.createElement('audio')
+bubbleSound1.src = 'bubble-sound1.wav'
 const bubbleSound2 = document.createElement('audio')
-bubbleSound2.src = 'bubble-sound1.wav'
-
-bubbleSound1.src = 'bubble-sound2.ogg'
+bubbleSound2.src = 'bubble-sound2.wav'
 
 function handleBubbles() {
     if (gameFrame % 25 === 0) {
         bubblesArray.push(new Bubble())
     }
 
-    for(let i = 0; i < bubblesArray.length; i++) {
+    for (let i = 0; i < bubblesArray.length; i++) {
         bubblesArray[i].update()
         bubblesArray[i].draw()
-    }
 
-    for(let i = 0; i < bubblesArray.length; i++) {
         if (bubblesArray[i].y < 0 - bubblesArray[i].radius * 2) {
             bubblesArray.splice(i, 1)
-        }
-
-        if (bubblesArray[i].distance < bubblesArray[i].radius + player.radius) {
+            i--
+        } else if (bubblesArray[i].distance < bubblesArray[i].radius + player.radius) {
             if (!bubblesArray[i].counted) {
 
                 if (bubblesArray[i].sound == 'sound1') {
@@ -167,24 +169,61 @@ function handleBubbles() {
                 bubblesArray[i].counted = true
                 score++
                 bubblesArray.splice(i, 1)
+                i--
             }
         }
     }
 }
 
+// repeating backgrounds
+const background = new Image()
+background.src = 'background1.png'
+
+const BACKGROUND = {
+    x1: 0,
+    x2: canvas.width,
+    y: 0,
+    width: canvas.width,
+    height: canvas.height
+}
+
+function handleBackground() {
+    BACKGROUND.x1 -= 1
+    if (BACKGROUND.x1 < -BACKGROUND.width) BACKGROUND.x1 = BACKGROUND.width
+    BACKGROUND.x2 -= 1
+    if (BACKGROUND.x2 < -BACKGROUND.width) BACKGROUND.x2 = BACKGROUND.width
+    context.drawImage(background, 
+        BACKGROUND.x1, 
+        BACKGROUND.y, 
+        BACKGROUND.width,
+        BACKGROUND.height
+    )
+
+    context.drawImage(background, 
+        BACKGROUND.x2,
+        BACKGROUND.y, 
+        BACKGROUND.width,
+        BACKGROUND.height
+    )
+}
 
 
 // animation loop
 function animate() {
     context.clearRect(0, 0, canvas.width, canvas.height);
+    handleBackground()
     handleBubbles()
     player.update()
     player.draw()
     context.fillStyle = 'black'
-    context.fillText(`score: ${score}`, 10, 50 )
+    context.fillText(`score: ${score}`, 10, 50)
     gameFrame++
 
     requestAnimationFrame(animate)
 }
 
 animate()
+
+window.addEventListener('resize', () => {
+    canvasPosition = canvas.getBoundingClientRect()
+})
