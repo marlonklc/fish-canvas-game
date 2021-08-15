@@ -6,6 +6,7 @@ canvas.height = 500
 
 let score = 0;
 let gameFrame = 0;
+let gameOver = false
 
 let FISH_SPEED = 30;
 
@@ -86,8 +87,8 @@ class Player {
                 this.frameY * this.spriteHeight,
                 this.spriteWidth,
                 this.spriteHeight,
-                0 - 60,
-                0 - 45,
+                -60,
+                -45,
                 this.spriteWidth / 4,
                 this.spriteHeight / 4
             )
@@ -97,8 +98,8 @@ class Player {
                 this.frameY * this.spriteHeight,
                 this.spriteWidth,
                 this.spriteHeight,
-                0 - 60,
-                0 - 45,
+                -60,
+                -45,
                 this.spriteWidth / 4,
                 this.spriteHeight / 4
             )
@@ -112,6 +113,8 @@ const player = new Player()
 
 // bubbles
 const bubblesArray = []
+const bubbleImage = new Image()
+bubbleImage.src = 'bubble1.png'
 class Bubble {
     constructor() {
         this.x = Math.random() * canvasPosition.width
@@ -131,12 +134,18 @@ class Bubble {
     }
 
     draw() {
-        context.fillStyle = 'blue'
-        context.beginPath()
-        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
-        context.fill()
-        context.closePath()
-        context.stroke()
+        // context.fillStyle = 'blue'
+        // context.beginPath()
+        // context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+        // context.fill()
+        // context.closePath()
+        // context.stroke()
+        context.drawImage(bubbleImage, 
+            this.x - 65, 
+            this.y - 65, 
+            this.radius * 2.6,
+            this.radius * 2.6
+        )
     }
 }
 
@@ -207,19 +216,103 @@ function handleBackground() {
     )
 }
 
+// Enemies
+const enemyImage = new Image()
+enemyImage.src = 'enemy1.png'
+
+class Enemy {
+    constructor() {
+        this.x = canvas.width + 200
+        this.y = Math.random() * (canvas.height - 150) + 90
+        this.radius = 60
+        this.speed = Math.random() * 2 + 2
+        this.frame = 0
+        this.frameX = 0
+        this.frameY = 0
+        this.spriteWidth = 418
+        this.spriteHeight = 397
+    }
+
+    draw() {
+        // context.fillStyle = 'red'
+        // context.beginPath()
+        // context.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+        // context.fill()
+        // context.closePath()
+        // context.stroke()
+        context.drawImage(enemyImage,
+            this.frameX * this.spriteWidth,
+            this.frameY * this.spriteHeight,
+            this.spriteWidth,
+            this.spriteHeight,
+            this.x - 60,
+            this.y - 70,
+            this.spriteWidth / 3,
+            this.spriteHeight / 3
+        )
+    }
+
+    update() {
+        this.x -= this.speed
+        if (this.x < 0 - this.radius * 2) {
+            this.x = canvas.width + 200
+            this.y = Math.random() * (canvas.height - 150) + 90
+            this.speed = Math.random() * 2 + 2
+        }
+        if (gameFrame % 5 === 0) {
+            this.frame++
+            
+            if (this.frame >= 12) this.frame = 0
+            if (this.frame === 3 || this.frame === 7 || this.frame === 11) {
+                this.frameX = 0
+            } else {
+                this.frameX++
+            }
+            
+            if (this.frame < 3) this.frameY = 0
+            else if (this.frame < 7) this.frameY = 1
+            else if (this.frame < 11) this.frameY = 2
+            else this.frameY = 0
+        }
+
+        // collision
+        const dx = this.x - player.x
+        const dy = this.y - player.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        if (distance < this.radius + player.radius) {
+            handleGameOver()
+        }
+    }
+}
+
+const enemies = []
+const enemy1 = new Enemy()
+
+function handleEnemies() {
+    enemy1.draw()
+    enemy1.update()
+}
+
+function handleGameOver() {
+    context.fillStyle = 'white'
+    context.fillText(`GAME OVER...to restart game press any key`, 130, 260)
+    gameOver = true
+}
+
 
 // animation loop
 function animate() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     handleBackground()
     handleBubbles()
+    handleEnemies()
     player.update()
     player.draw()
     context.fillStyle = 'black'
     context.fillText(`score: ${score}`, 10, 50)
     gameFrame++
 
-    requestAnimationFrame(animate)
+    if (!gameOver) requestAnimationFrame(animate)
 }
 
 animate()
